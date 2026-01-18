@@ -30,12 +30,12 @@ export default function ShopPage() {
     }, [])
 
     const handleBuy = async (item: Item) => {
-        if (!session?.user?.id) {
+        if (!(session?.user as any)?.id) {
             toast.error('Please login first')
             return
         }
 
-        const promise = buyItem(session.user.id, item.id)
+        const promise = buyItem((session.user as any).id, item.id)
 
         toast.promise(promise, {
             loading: 'Purchasing...',

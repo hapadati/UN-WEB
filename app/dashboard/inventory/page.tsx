@@ -14,9 +14,9 @@ export default function InventoryPage() {
     const [loading, setLoading] = useState(true)
 
     const fetchInventory = async () => {
-        if (!session?.user?.id) return
+        if (!(session?.user as any)?.id) return
         try {
-            const data = await getUserInventory(session.user.id)
+            const data = await getUserInventory((session.user as any).id)
             if (data?.items) {
                 setItems(data.items)
             }
@@ -29,12 +29,12 @@ export default function InventoryPage() {
 
     useEffect(() => {
         fetchInventory()
-    }, [session?.user?.id])
+    }, [(session?.user as any)?.id])
 
     const handleUse = async (item: Item) => {
-        if (!session?.user?.id) return
+        if (!(session?.user as any)?.id) return
 
-        const promise = useItem(session.user.id, item.id)
+        const promise = useItem((session.user as any).id, item.id)
 
         toast.promise(promise, {
             loading: 'Using item...',

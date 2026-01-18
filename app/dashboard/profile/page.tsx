@@ -16,7 +16,7 @@ export default function ProfilePage() {
     const [activities, setActivities] = useState<ActivityEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const userId = session?.user?.id || 'guest';
+    const userId = (session?.user as any)?.id || 'guest';
 
     const fetchData = async () => {
         setIsLoading(true);
