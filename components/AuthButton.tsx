@@ -1,7 +1,6 @@
 'use client'
 
 import { signIn, signOut, useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button" // Assuming you have shadcn UI or will create basic button
 import { LogIn, LogOut, User } from "lucide-react"
 
 export function AuthButton() {
