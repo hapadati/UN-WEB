@@ -61,7 +61,7 @@ export default function DashboardLayout({
                             )}
                             <div className="min-w-0">
                                 <p className="text-sm font-medium truncate">{session?.user?.name || 'Guest'}</p>
-                                <p className="text-xs text-zinc-500 truncate">ID: {session?.user?.id?.slice(0, 8) || '...'}...</p>
+                                <p className="text-xs text-zinc-500 truncate">ID: {(session?.user as any)?.id?.slice(0, 8) || '...'}...</p>
                             </div>
                         </div>
                         <button onClick={() => signOut()} className="p-2 hover:bg-white/5 rounded-full text-zinc-400 hover:text-white transition">
