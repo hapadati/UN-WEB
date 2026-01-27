@@ -24,15 +24,26 @@ export default function SettingsPage() {
 
     const userId = (session?.user as any)?.id;
 
-    const handleSave = () => {
-        // API呼び出し（実装後に有効化）
-        // await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/settings`, {
-        //     method: 'POST',
-        //     headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
-        //     body: JSON.stringify({ notifications, privacy, theme })
-        // });
+    const handleSave = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/settings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Bot-ID': 'UNITED_NAMELESS_BOT'
+                },
+                body: JSON.stringify({ userId, notifications, privacy, theme })
+            });
 
-        toast.success('設定を保存しました');
+            if (response.ok) {
+                toast.success('設定を保存しました');
+            } else {
+                throw new Error('Failed to save settings');
+            }
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            toast.error('設定の保存に失敗しました');
+        }
     };
 
     return (
@@ -152,8 +163,8 @@ export default function SettingsPage() {
                     <button
                         onClick={() => setTheme('dark')}
                         className={`p-4 rounded-xl border-2 transition-all ${theme === 'dark'
-                                ? 'border-purple-500 bg-purple-500/10'
-                                : 'border-white/10 hover:border-white/20'
+                            ? 'border-purple-500 bg-purple-500/10'
+                            : 'border-white/10 hover:border-white/20'
                             }`}
                     >
                         <div className="w-full h-20 bg-zinc-900 rounded-lg mb-3 flex items-center justify-center">
@@ -164,8 +175,8 @@ export default function SettingsPage() {
                     <button
                         onClick={() => setTheme('light')}
                         className={`p-4 rounded-xl border-2 transition-all opacity-50 cursor-not-allowed ${theme === 'light'
-                                ? 'border-purple-500 bg-purple-500/10'
-                                : 'border-white/10'
+                            ? 'border-purple-500 bg-purple-500/10'
+                            : 'border-white/10'
                             }`}
                         disabled
                     >

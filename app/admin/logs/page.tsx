@@ -32,61 +32,21 @@ export default function AuditLogsPage() {
     const fetchLogs = async () => {
         setLoading(true);
         try {
-            // API呼び出し（実装後に有効化）
-            // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/audit?limit=${limit}`, {
-            //     headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
-            // });
-            // const data = await response.json();
-            // setLogs(data.logs || []);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/audit?limit=${limit}`, {
+                headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+            });
 
-            // モックデータ（開発用）
-            const mockLogs: AuditLog[] = [
-                {
-                    id: '1',
-                    timestamp: new Date(Date.now() - 10000).toISOString(),
-                    userId: userId || 'unknown',
-                    action: 'Admin権限承認',
-                    details: 'User ID 987654321 の Admin権限を承認しました',
-                    severity: 'success'
-                },
-                {
-                    id: '2',
-                    timestamp: new Date(Date.now() - 60000).toISOString(),
-                    userId: userId || 'unknown',
-                    action: 'ログイン',
-                    details: 'Discord OAuth認証でログインしました',
-                    severity: 'info'
-                },
-                {
-                    id: '3',
-                    timestamp: new Date(Date.now() - 120000).toISOString(),
-                    userId: '123456789',
-                    action: 'Emergency Lockdown',
-                    details: 'システムロックダウンを実行しました。理由：セキュリティテスト',
-                    severity: 'warning'
-                },
-                {
-                    id: '4',
-                    timestamp: new Date(Date.now() - 180000).toISOString(),
-                    userId: userId || 'unknown',
-                    action: 'Admin権限却下',
-                    details: 'User ID 111222333 の Admin権限リクエストを却下しました',
-                    severity: 'error'
-                },
-                {
-                    id: '5',
-                    timestamp: new Date(Date.now() - 300000).toISOString(),
-                    userId: '987654321',
-                    action: '2FA セットアップ',
-                    details: '2要素認証を有効化しました',
-                    severity: 'success'
-                }
-            ];
+            if (!response.ok) {
+                throw new Error('Failed to fetch audit logs');
+            }
 
-            setLogs(mockLogs);
+            const data = await response.json();
+            setLogs(data.logs || []);
         } catch (error) {
             console.error('Failed to fetch audit logs:', error);
             toast.error('監査ログの取得に失敗しました');
+            // Fallback to empty array on error
+            setLogs([]);
         } finally {
             setLoading(false);
         }
@@ -205,7 +165,7 @@ export default function AuditLogsPage() {
                         <h3 className="text-yellow-500 font-bold mb-2">注意事項</h3>
                         <ul className="text-zinc-400 text-sm space-y-1 list-disc list-inside">
                             <li>監査ログは重要なセキュリティ情報です。不審な活動があればすぐに対処してください。</li>
-                            <li>現在はモックデータを表示しています。API実装後に実際のログが表示されます。</li>
+                            <li>ログが表示されない場合は、APIサーバーが起動しているか確認してください。</li>
                         </ul>
                     </div>
                 </div>
