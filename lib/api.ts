@@ -107,7 +107,152 @@ export interface ActivityEntry {
     timestamp: string;
 }
 
-export async function getUserActivity(userId: string, limit: number = 10): Promise<ActivityEntry[] | null> {
-    const res = await fetchAPI(`/activity/recent?userId=${userId}&limit=${limit}`);
-    return res?.activities || null;
+export async function getUserActivity(userId: string, limit: number = 10): Promise<ActivityEntry[]> {
+    try {
+        const data = await fetchAPI(`/activity/${userId}?limit=${limit}`);
+        return data?.activities || [];
+    } catch (error) {
+        console.error('Failed to fetch user activity:', error);
+        return [];
+    }
+}
+
+// Admin承認システム関連
+export async function requestAdminAccess(userId: string, reason: string) {
+    return fetchAPI('/admin/request-access', {
+        method: 'POST',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify({ userId, reason })
+    });
+}
+
+export async function checkSuperAdmin(userId: string) {
+    return fetchAPI(`/admin/super-check?userId=${userId}`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function getAdminApprovals(userId: string) {
+    return fetchAPI(`/admin/approvals?userId=${userId}`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function approveAdmin(requestId: string, userId: string, approvedBy: string, totpCode: string) {
+    return fetchAPI('/admin/approve', {
+        method: 'POST',
+        headers: {
+            'X-Bot-ID': 'UNITED_NAMELESS_BOT',
+            'X-TOTP-Token': totpCode
+        },
+        body: JSON.stringify({ requestId, userId, approvedBy })
+    });
+}
+
+export async function rejectAdmin(requestId: string, rejectedBy: string, reason: string, totpCode: string) {
+    return fetchAPI('/admin/reject', {
+        method: 'POST',
+        headers: {
+            'X-Bot-ID': 'UNITED_NAMELESS_BOT',
+            'X-TOTP-Token': totpCode
+        },
+        body: JSON.stringify({ requestId, rejectedBy, reason })
+    });
+}
+
+// 通報管理関連
+export async function getReports(status?: string, limit: number = 50) {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    params.append('limit', limit.toString());
+
+    return fetchAPI(`/reports?${params.toString()}`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function getReport(reportId: string) {
+    return fetchAPI(`/reports/${reportId}`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function updateReport(reportId: string, data: { status?: string, action?: string, notes?: string, reviewedBy?: string }) {
+    return fetchAPI(`/reports/${reportId}`, {
+        method: 'PATCH',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify(data)
+    });
+}
+
+export async function deleteReport(reportId: string, deletedBy: string) {
+    return fetchAPI(`/reports/${reportId}`, {
+        method: 'DELETE',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify({ deletedBy })
+    });
+}
+
+export async function getReportStats() {
+    return fetchAPI('/reports/stats', {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+// 会議室管理関連
+export async function getMeetingRooms(status: string = 'active') {
+    return fetchAPI(`/meeting/rooms?status=${status}`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function createMeetingRoom(name: string, description: string, createdBy: string) {
+    return fetchAPI('/meeting/rooms', {
+        method: 'POST',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify({ name, description, createdBy })
+    });
+}
+
+export async function deleteMeetingRoom(roomId: string) {
+    return fetchAPI(`/meeting/rooms/${roomId}`, {
+        method: 'DELETE',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function getMeetingMessages(roomId: string, limit: number = 50) {
+    return fetchAPI(`/meeting/rooms/${roomId}/messages?limit=${limit}`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function sendMeetingMessage(roomId: string, userId: string, userName: string, content: string) {
+    return fetchAPI(`/meeting/rooms/${roomId}/messages`, {
+        method: 'POST',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify({ userId, userName, content })
+    });
+}
+
+export async function getMeetingNotes(roomId: string) {
+    return fetchAPI(`/meeting/rooms/${roomId}/notes`, {
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' }
+    });
+}
+
+export async function createMeetingNote(roomId: string, title: string, content: string, createdBy: string) {
+    return fetchAPI(`/meeting/rooms/${roomId}/notes`, {
+        method: 'POST',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify({ title, content, createdBy })
+    });
+}
+
+export async function updateMeetingNote(roomId: string, noteId: string, data: { title?: string, content?: string, pinned?: boolean }) {
+    return fetchAPI(`/meeting/rooms/${roomId}/notes/${noteId}`, {
+        method: 'PATCH',
+        headers: { 'X-Bot-ID': 'UNITED_NAMELESS_BOT' },
+        body: JSON.stringify(data)
+    });
 }

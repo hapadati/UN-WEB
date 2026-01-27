@@ -6,13 +6,22 @@ import { Shield, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface TotpVerifyModalProps {
-    isOpen: boolean;
-    onClose: () => void;
+    isOpen?: boolean; // オプショナルに変更（従来のAPI）
+    onClose?: () => void; // オプショナルに
     onVerify: (code: string) => Promise<boolean>;
-    actionName: string;
+    actionName?: string; // オプショナルに
+    title?: string; // 新規追加
+    description?: string; // 新規追加
 }
 
-export function TotpVerifyModal({ isOpen, onClose, onVerify, actionName }: TotpVerifyModalProps) {
+export function TotpVerifyModal({
+    isOpen = true,
+    onClose = () => { },
+    onVerify,
+    actionName = 'this action',
+    title,
+    description
+}: TotpVerifyModalProps) {
     const [code, setCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -51,6 +60,9 @@ export function TotpVerifyModal({ isOpen, onClose, onVerify, actionName }: TotpV
 
     if (!isOpen) return null;
 
+    const displayTitle = title || 'Security Check';
+    const displayDescription = description || `Enter 2FA code to confirm ${actionName}`;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <motion.div
@@ -71,10 +83,8 @@ export function TotpVerifyModal({ isOpen, onClose, onVerify, actionName }: TotpV
                         <Shield size={32} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">Security Check</h3>
-                        <p className="text-zinc-400 text-sm mt-1">
-                            Enter 2FA code to confirm <span className="text-red-400 font-bold">{actionName}</span>
-                        </p>
+                        <h3 className="text-xl font-bold text-white">{displayTitle}</h3>
+                        <p className="text-zinc-400 text-sm mt-1">{displayDescription}</p>
                     </div>
                 </div>
 
