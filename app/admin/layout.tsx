@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
@@ -24,6 +24,7 @@ import {
 import { signOut, useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { AuthButton } from '@/components/AuthButton';
+import { fetchAPI } from '@/lib/api';
 
 export default function AdminLayout({
     children,
@@ -31,8 +32,57 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [isMobileOpen, setIsMobileOpen] = React.useState(false);
-    const { data: session } = useSession();
+    const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const { data: session, status } = useSession();
+
+    const userId = (session?.user as any)?.id;
+
+    // Admin権限チェック
+    useEffect(() => {
+        const checkAdminPermission = async () => {
+            if (status === 'loading') return;
+
+            if (!session || !userId) {
+                router.push('/login');
+                return;
+            }
+
+            try {
+                const response = await fetchAPI(`/admin/check?userId=${userId}`);
+
+                if (response && response.isAdmin) {
+                    setIsAdmin(true);
+                } else {
+                    setIsAdmin(false);
+                    router.push('/dashboard');
+                }
+            } catch (error) {
+                console.error('Failed to check admin permission:', error);
+                setIsAdmin(false);
+                router.push('/dashboard');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkAdminPermission();
+    }, [session, userId, status, router]);
+
+    // ローディング中またはadminでない場合
+    if (isLoading || isAdmin === null) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-[#050505]">
+                <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full" />
+            </div>
+        );
+    }
+
+    if (isAdmin === false) {
+        return null; // リダイレクト中
+    }
 
     const sidebarLinks = [
         { icon: LayoutDashboard, label: 'Overview', href: '/admin' },
